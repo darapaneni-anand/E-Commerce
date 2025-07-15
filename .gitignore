@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Compiled output
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Database files (if using SQLite or local DB files)
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+*.tgz
+.idea/
+.vscode/
+*.swp
+
+# Optional: if using TypeScript
+*.tsbuildinfo

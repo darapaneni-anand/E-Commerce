@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-import all_product from "../../assets/all_product"; // adjust path as needed
+import all_product from "../../assets/all_product";
 
 const ProductContext = createContext();
 
@@ -29,13 +29,19 @@ export const ProductProvider = ({ children }) => {
   };
 
   // Update quantity
-  const updateQuantity = (id, quantity) => {
+  const updateCartQuantity = (id, quantity) => {
     setCartItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity } : item
       )
     );
   };
+
+  // Calculate total items in cart
+  const cartCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   return (
     <ProductContext.Provider
@@ -45,7 +51,8 @@ export const ProductProvider = ({ children }) => {
         cartItems,
         addToCart,
         removeFromCart,
-        updateQuantity
+        updateCartQuantity,
+        cartCount, // ✅ Added cartCount here
       }}
     >
       {children}

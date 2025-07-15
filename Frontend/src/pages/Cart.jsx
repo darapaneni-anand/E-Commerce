@@ -3,11 +3,16 @@ import ProductContext from '../components/Context/ProductContext';
 import { Link } from 'react-router-dom';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateCartQuantity } = useContext(ProductContext);
+  const {
+    cartItems,
+    removeFromCart,
+    updateCartQuantity,
+  } = useContext(ProductContext);
+
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
 
-  // Example: flat 10% discount if code is SAVE10
+  // Example promo logic
   const applyPromo = () => {
     if (promoCode.trim().toUpperCase() === 'SAVE10') {
       setPromoDiscount(0.1);
@@ -45,7 +50,7 @@ const Cart = () => {
       <h1 className="text-4xl font-bold text-rose-700 mb-12">Your Shopping Cart</h1>
 
       <div className="grid md:grid-cols-3 gap-10">
-        {/* LEFT: Products */}
+        {/* LEFT SIDE: CART ITEMS */}
         <div className="md:col-span-2 space-y-6">
           {cartItems.map((item) => (
             <div
@@ -77,15 +82,27 @@ const Cart = () => {
 
                 <div className="flex items-center gap-3">
                   <label className="text-gray-700">Qty:</label>
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    min={1}
-                    onChange={(e) =>
-                      updateCartQuantity(item.id, parseInt(e.target.value))
-                    }
-                    className="w-16 border rounded px-2 py-1"
-                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        updateCartQuantity(item.id, Math.max(1, item.quantity - 1))
+                      }
+                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+                    >
+                      −
+                    </button>
+
+                    <span className="w-8 text-center">{item.quantity}</span>
+
+                    <button
+                      onClick={() =>
+                        updateCartQuantity(item.id, item.quantity + 1)
+                      }
+                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -103,7 +120,7 @@ const Cart = () => {
           ))}
         </div>
 
-        {/* RIGHT: Summary */}
+        {/* RIGHT SIDE: SUMMARY */}
         <div className="space-y-6 p-6 border rounded shadow bg-white">
           <h2 className="text-2xl font-bold text-rose-700 mb-4">Order Summary</h2>
 
@@ -131,7 +148,7 @@ const Cart = () => {
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
 
-          {/* Promo code */}
+          {/* PROMO CODE */}
           <div className="mt-6">
             <label htmlFor="promo" className="block mb-2 text-gray-700">
               Have a promo code?

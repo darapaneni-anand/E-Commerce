@@ -9,6 +9,10 @@ const path = require("path");
 const cors = require("cors");
 const uri = process.env.MONGO_URL;
 const Product = require("./models/Product");
+const bcrypt = require("bcrypt");
+const User = require("./models/User"); 
+
+
 
 app.use(express.json());
 app.use(cors());
@@ -37,7 +41,7 @@ const upload = multer({ storage: storage });
 app.use("/images", express.static("upload/images"));
 
 // 3. Upload endpoint
-app.post("/upload", upload.single('product'), (req, res) => {
+app.post("/upload", upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: 0, message: "No file uploaded" });
     }
@@ -104,6 +108,97 @@ app.get('/allproducts',async(req,res)=>
 {
   let products = await Product.find({});
   res.send(products);
+});
+
+app.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
+
+  try {
+    // Check if email is already registered
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: "Email already registered" });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create and save the user
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Respond with token and user info (without password)
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+      }
+    });
+
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // 1. Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // 2. Compare password
+    const isMatch = await bcrypt.compare(password, existingUser.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // 3. Create JWT token
+    const token = jwt.sign(
+      { userId: existingUser._id, email: existingUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // 4. Send token and user data
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: existingUser._id,
+        username: existingUser.username,
+        email: existingUser.email,
+      },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
 app.listen(port,(error)=>

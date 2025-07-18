@@ -91,7 +91,7 @@ function Navbar() {
         {/* Right side - login + cart */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            to="/login"
+            to="/auth"
             className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-100 font-semibold"
           >
             Login
@@ -152,7 +152,7 @@ function Navbar() {
             </li>
             <li>
               <Link
-                to="/login"
+                to="/auth"
                 className="block bg-white text-blue-600 px-3 py-2 rounded hover:bg-gray-100 font-semibold"
                 onClick={() => setMobileMenuOpen(false)}
               >

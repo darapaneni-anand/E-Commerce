@@ -8,6 +8,7 @@ import kids_banner from "./assets/banner_kids.png";
 import Product from './pages/Product.jsx';
 import Cart from "./pages/Cart";
 import Footer from "./components/Footer.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 
 
 
@@ -20,6 +21,8 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/auth" element={<AuthPage />} />
+
         <Route path = "/mens" element={<ShopCategory banner={men_banner} category= "men"/>} />
         <Route path = "/womens" element={<ShopCategory banner={women_banner} category = "women"/>} />
         <Route path = "/kids" element={<ShopCategory banner={kids_banner} category = "kid"/>} />

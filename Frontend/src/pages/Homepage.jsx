@@ -18,7 +18,6 @@ function HomePage() {
    <NewCollections/>
    <Newsletter/>
   
-   <Authpage/>
   
    </div>
   );

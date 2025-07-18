@@ -5,9 +5,8 @@ const ProductContext = createContext();
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const user = JSON.parse(localStorage.getItem("user"));
 
-  // 🔁 Fetch all products
+  // ✅ Fetch all products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -23,87 +22,50 @@ export const ProductProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  // 🔁 Fetch cart from DB after login
+  // ✅ Load cart from localStorage on mount
   useEffect(() => {
-    const fetchUserCart = async () => {
-      if (!user?.id || products.length === 0) return;
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartItems(storedCart);
+  }, []);
 
-      try {
-        const res = await fetch(`http://localhost:4000/get-cart/${user.id}`);
-        const result = await res.json();
-        if (result.success) {
-          const restoredCart = result.cartData.map(item => {
-            const product = products.find(p => p.id === item.productId);
-            return product ? { ...product, quantity: item.quantity } : null;
-          }).filter(Boolean);
-          setCartItems(restoredCart);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user cart:", err.message);
-      }
-    };
-
-    fetchUserCart();
-  }, [products, user?.id]);
-
-  // 📤 Sync cart to DB on change (only if user is logged in)
+  // ✅ Save cart to localStorage on change
   useEffect(() => {
-    const syncCartToBackend = async () => {
-      if (!user?.id) return;
-      try {
-        await fetch("http://localhost:4000/update-cart", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user.id,
-            cartData: cartItems.map(item => ({
-              productId: item.id,
-              quantity: item.quantity
-            }))
-          })
-        });
-      } catch (err) {
-        console.error("Failed to sync cart to DB:", err.message);
-      }
-    };
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
-    syncCartToBackend();
-  }, [cartItems, user?.id]);
-
+  // ✅ Add to cart (client only)
   const addToCart = (product, quantity = 1) => {
-  setCartItems((prev) => {
-    const existing = prev.find((item) => item.id === product.id);
+    const existing = cartItems.find(item => item.id === product._id);
     if (existing) {
-      return prev.map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+      setCartItems(prev =>
+        prev.map(item =>
+          item.id === product._id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        )
       );
     } else {
-      return [...prev, { ...product, quantity }];
+      setCartItems(prev => [
+        ...prev,
+        {
+          id: product._id,
+          name: product.name,
+          image: product.image,
+          category: product.category,
+          new_price: product.new_price,
+          old_price: product.old_price,
+          quantity,
+        },
+      ]);
     }
-  });
+  };
 
-  // Backend sync
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (user?.id) {
-    fetch("http://localhost:4000/add-to-cart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: user.id,
-        productId: product.id, // ✅ only send id
-        quantity
-      })
-    }).catch(err => console.error("Cart sync failed:", err));
-  }
-};
-
-
-  // ❌ Remove item
+  // ✅ Remove from cart (client only)
   const removeFromCart = (id) => {
     setCartItems(prev => prev.filter(item => item.id !== id));
   };
 
-  // 🔁 Update quantity
+  // ✅ Update quantity (client only)
   const updateCartQuantity = (id, quantity) => {
     setCartItems(prev =>
       prev.map(item =>

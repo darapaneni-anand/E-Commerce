@@ -97,7 +97,7 @@ function AddProduct() {
           <option value="">Select Category</option>
           <option value="men">Men</option>
           <option value="women">Women</option>
-          <option value="kids">Kids</option>
+          <option value="kid">Kid</option>
         </select>
 
         {/* Old Price */}

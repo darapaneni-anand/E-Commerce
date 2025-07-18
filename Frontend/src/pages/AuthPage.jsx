@@ -47,9 +47,9 @@ const AuthPage = () => {
       }
 
       localStorage.setItem('token', data.token);
-      alert(`${isLogin ? 'Login' : 'Signup'} successful`);
+     localStorage.setItem('user', JSON.stringify(data.user)); // ← store user info (like _id)
 
-      // Redirect to home page
+      alert(`${isLogin ? 'Login' : 'Signup'} successful`);
       window.location.href = '/';
     } catch (err) {
       setError(err.message);
@@ -58,42 +58,19 @@ const AuthPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-tr from-rose-50 to-rose-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
-        <h1 className="text-3xl font-bold text-rose-600 text-center mb-6">
-          {isLogin ? 'Login to your account' : 'Create a new account'}
+      <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl border border-gray-100">
+        <h1 className="text-3xl font-extrabold text-rose-600 text-center mb-6">
+          {isLogin ? 'Welcome Back!' : 'Join Us Today'}
         </h1>
-
-        <div className="flex justify-center mb-6">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`px-6 py-2 font-medium rounded-l-full transition duration-300 border ${
-              isLogin
-                ? 'bg-rose-600 text-white border-rose-600'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`px-6 py-2 font-medium rounded-r-full transition duration-300 border ${
-              !isLogin
-                ? 'bg-rose-600 text-white border-rose-600'
-                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
 
         {error && (
           <p className="text-center text-red-600 font-medium mb-4">{error}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
             <div>
-              <label htmlFor="name" className="block text-sm text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Name
               </label>
               <input
@@ -101,14 +78,14 @@ const AuthPage = () => {
                 id="name"
                 onChange={handleChange}
                 value={formData.name}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent"
                 placeholder="Your name"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -116,14 +93,14 @@ const AuthPage = () => {
               id="email"
               onChange={handleChange}
               value={formData.email}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent"
               placeholder="you@example.com"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <div className="relative">
@@ -132,14 +109,14 @@ const AuthPage = () => {
                 id="password"
                 onChange={handleChange}
                 value={formData.password}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent"
                 placeholder="••••••••"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-2 text-sm text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-2.5 text-xs text-gray-500 hover:text-rose-500 transition"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -148,11 +125,21 @@ const AuthPage = () => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md transition duration-300 shadow"
+            className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow-lg transition duration-300"
           >
-            {isLogin ? 'Login' : 'Sign Up'}
+            {isLogin ? 'Login' : 'Create Account'}
           </button>
         </form>
+
+        <p className="text-center text-sm text-gray-600 mt-5">
+          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+          <button
+            onClick={handleToggle}
+            className="text-rose-600 font-semibold hover:underline ml-1"
+          >
+            Click here
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -14,7 +14,9 @@ export const ProductProvider = ({ children }) => {
         const res = await fetch('http://localhost:4000/allproducts');
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch products");
-        setProducts(data);
+        // Normalize ID
+        const normalized = data.map(p => ({ ...p, id: p._id || p.id }));
+        setProducts(normalized);
       } catch (err) {
         console.error("Error fetching products:", err.message);
       }
@@ -22,11 +24,11 @@ export const ProductProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  // Load cart from backend or localStorage on mount
+  // Load cart
   useEffect(() => {
     const loadCart = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (user && user.id) {
+      if (user?.id) {
         try {
           const res = await fetch(`http://localhost:4000/getcart/${user.id}`);
           const data = await res.json();
@@ -36,21 +38,20 @@ export const ProductProvider = ({ children }) => {
             return;
           }
         } catch (err) {
-          console.error("Error fetching cart from backend:", err.message);
+          console.error("Error fetching cart:", err.message);
         }
       }
       const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
       setCartItems(storedCart);
       setIsCartLoaded(true);
     };
-
     loadCart();
   }, []);
 
-  // Save cart to backend only after initial cart load
+  // Save cart to backend
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (isCartLoaded && user && user.id && cartItems.length >= 0) {
+    if (isCartLoaded && user?.id) {
       fetch("http://localhost:4000/savecart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,24 +61,23 @@ export const ProductProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems, isCartLoaded]);
 
-  // Clear cart automatically if user logs out (token removed)
+  // Clear cart when user logs out
   useEffect(() => {
     const handleStorageChange = () => {
       const token = localStorage.getItem("token");
-      if (!token) setCartItems([]);  // clear cart if no token
+      if (!token) setCartItems([]);
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Add to cart
-  const addToCart = (product, quantity = 1) => {
+  // Add to cart with size
+  const addToCart = (product, quantity = 1, size = "M") => {
     setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id || item.id === product._id);
+      const existing = prev.find(item => item.id === product.id && item.size === size);
       if (existing) {
         return prev.map(item =>
-          (item.id === product.id || item.id === product._id)
+          item.id === product.id && item.size === size
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -85,31 +85,33 @@ export const ProductProvider = ({ children }) => {
       return [
         ...prev,
         {
-          id: product._id || product.id,
+          id: product.id,
           name: product.name,
           image: product.image,
           category: product.category,
           new_price: product.new_price,
           old_price: product.old_price,
           quantity,
+          size,
         },
       ];
     });
   };
 
-  // Remove from cart
-  const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
+  const removeFromCart = (id, size) =>
+  setCartItems((prev) =>
+    prev.filter((item) => !(item.id === id && item.size === size))
+  );
 
-  // Update quantity
-  const updateCartQuantity = (id, quantity) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
-  };
+  const updateCartQuantity = (id, quantity, size) =>
+  setCartItems((prev) =>
+    prev.map((item) =>
+      item.id === id
+        ? { ...item, quantity, size: size || item.size }
+        : item
+    )
+  );
+
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -119,7 +121,7 @@ export const ProductProvider = ({ children }) => {
         products,
         setProducts,
         cartItems,
-        setCartItems,  // added to context
+        setCartItems,
         addToCart,
         removeFromCart,
         updateCartQuantity,

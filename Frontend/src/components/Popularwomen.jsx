@@ -1,12 +1,14 @@
-import React from "react";
-import data_product from "../assets/data"; // Make sure this is correct
-import Item from "../components/Item";     // Reusable product card
+import React, { useContext } from "react";
+import ProductContext from "../components/Context/ProductContext";
+import Item from "../components/Item";
 
 function PopularWomen() {
-  // Filter for women category only
-  const womenProducts = data_product.filter(
-    (product) => product.category === "women"
-  );
+  const { products } = useContext(ProductContext);
+
+  // Filter for women's products and take only 4
+  const womenProducts = products
+    .filter((product) => product.category === "women")
+    .slice(0, 4);
 
   return (
     <section className="py-16 bg-white">
@@ -14,17 +16,9 @@ function PopularWomen() {
         <h2 className="text-center text-4xl md:text-5xl font-extrabold text-rose-700 mb-12">
           Popular for Women
         </h2>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {womenProducts.map((product) => (
-            <Item
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              image={product.image}
-              old_price={product.old_price}
-              new_price={product.new_price}
-            />
+            <Item key={product.id} {...product} />
           ))}
         </div>
       </div>

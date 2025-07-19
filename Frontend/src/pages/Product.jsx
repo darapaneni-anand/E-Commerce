@@ -7,7 +7,8 @@ const Product = () => {
   const { id } = useParams();
   const { products } = useContext(ProductContext);
 
-  const product = products.find((p) => p.id === parseInt(id));
+  // Find the selected product (handles both id and _id, string comparison)
+  const product = products.find((p) => String(p.id || p._id) === String(id));
 
   if (!product) {
     return (
@@ -18,7 +19,10 @@ const Product = () => {
     );
   }
 
-  const related = products.filter((p) => p.id !== product.id).slice(0, 4);
+  // Get up to 4 other products of the same category
+  const related = products
+    .filter((p) => p.category === product.category && String(p.id || p._id) !== String(id))
+    .slice(0, 4);
 
   return (
     <ProductDisplay

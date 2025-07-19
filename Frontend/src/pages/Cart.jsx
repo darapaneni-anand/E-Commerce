@@ -3,8 +3,7 @@ import ProductContext from "../components/Context/ProductContext";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateCartQuantity } =
-    useContext(ProductContext);
+  const { cartItems, removeFromCart, updateCartQuantity } = useContext(ProductContext);
 
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
@@ -29,13 +28,23 @@ const Cart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-700">
-        <h2 className="text-3xl font-bold mb-4">Your cart is empty!</h2>
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 bg-gradient-to-b from-rose-50 to-pink-50">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
+          alt="Empty cart"
+          className="w-48 h-48 mb-6 opacity-80"
+        />
+        <h2 className="text-3xl md:text-4xl font-bold text-rose-700 mb-3">
+          Your cart is empty!
+        </h2>
+        <p className="text-gray-600 mb-6 max-w-md">
+          Looks like you haven’t added anything yet. Explore our latest collection now!
+        </p>
         <Link
           to="/"
-          className="inline-block mt-4 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded"
+          className="px-8 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-full shadow-md transition-transform transform hover:scale-105"
         >
-          Go Shopping
+          Start Shopping
         </Link>
       </div>
     );
@@ -43,84 +52,89 @@ const Cart = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-4xl font-bold text-rose-700 mb-12">
-        Your Shopping Cart
-      </h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-rose-700 mb-10">Your Shopping Cart</h1>
 
-      <div className="grid md:grid-cols-3 gap-10">
+      <div className="grid md:grid-cols-3 gap-8">
+        {/* Cart Items */}
         <div className="md:col-span-2 space-y-6">
           {cartItems.map((item) => (
             <div
-              key={item.id}
-              className="flex flex-col md:flex-row gap-6 items-center border p-4 rounded shadow bg-white"
+              key={`${item.id}-${item.size}`}
+              className="flex flex-col md:flex-row gap-6 items-center p-5 rounded-xl shadow-md bg-white hover:shadow-lg transition"
             >
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-32 h-32 object-contain rounded"
+              className="w-36 h-36 object-contain rounded-xl bg-white border border-gray-200 shadow-sm"
               />
 
-              <div className="flex-1 space-y-2">
-                <Link
-                  to={`/product/${item.id}`}
-                  className="text-lg font-bold text-rose-700 hover:underline"
-                >
-                  {item.name}
-                </Link>
+             <div className="flex-1 space-y-2">
+  <Link
+    to={`/product/${item.id}`}
+    className="text-lg font-bold text-rose-700 hover:underline"
+  >
+    {item.name}
+  </Link>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-500 line-through">
-                    ₹{item.old_price}
-                  </span>
-                  <span className="text-rose-600 font-bold text-xl">
-                    ₹{item.new_price}
-                  </span>
-                </div>
+  {/* Size Selector */}
+  <div className="flex items-center gap-3">
+    <label className="text-gray-700">Size:</label>
+    <select
+      value={item.size}
+      onChange={(e) =>
+        updateCartQuantity(item.id, item.quantity, e.target.value)
+      }
+      className="border rounded px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-400"
+    >
+      <option value="S">S</option>
+      <option value="M">M</option>
+      <option value="L">L</option>
+      <option value="XL">XL</option>
+    </select>
+  </div>
 
-                <div className="flex items-center gap-3">
-                  <label className="text-gray-700">Qty:</label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() =>
-                        updateCartQuantity(item.id, Math.max(1, item.quantity - 1))
-                      }
-                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-                    >
-                      −
-                    </button>
 
-                    <span className="w-8 text-center">{item.quantity}</span>
-
-                    <button
-                      onClick={() =>
-                        updateCartQuantity(item.id, item.quantity + 1)
-                      }
-                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-                    >
-                      +
-                    </button>
-                  </div>
+                {/* Quantity controls */}
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() =>
+                      updateCartQuantity(item.id, item.size, Math.max(1, item.quantity - 1))
+                    }
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full"
+                  >
+                    −
+                  </button>
+                  <span className="w-10 text-center font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      updateCartQuantity(item.id, item.size, item.quantity + 1)
+                    }
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full"
+                  >
+                    +
+                  </button>
                 </div>
 
                 <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="text-rose-600 hover:text-rose-800 text-sm mt-2"
+                  onClick={() => removeFromCart(item.id, item.size)}
+                  className="text-rose-500 hover:text-rose-700 text-sm mt-2"
                 >
                   Remove
                 </button>
               </div>
 
-              <div className="text-gray-700 font-semibold">
+              <div className="text-lg font-semibold text-gray-700">
                 ₹{(item.new_price * item.quantity).toFixed(2)}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="space-y-6 p-6 border rounded shadow bg-white">
-          <h2 className="text-2xl font-bold text-rose-700 mb-4">Order Summary</h2>
+        {/* Order Summary */}
+        <div className="space-y-6 p-6 border rounded-xl shadow-md bg-white">
+          <h2 className="text-xl font-bold text-rose-700 mb-4">Order Summary</h2>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between text-gray-700">
             <span>Subtotal</span>
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
@@ -132,11 +146,9 @@ const Cart = () => {
             </div>
           )}
 
-          <div className="flex justify-between">
+          <div className="flex justify-between text-gray-700">
             <span>Shipping</span>
-            <span>
-              {shippingFee === 0 ? "Free" : `₹${shippingFee.toFixed(2)}`}
-            </span>
+            <span>{shippingFee === 0 ? "Free" : `₹${shippingFee.toFixed(2)}`}</span>
           </div>
 
           <hr />
@@ -146,8 +158,8 @@ const Cart = () => {
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
 
-          <div className="mt-6">
-            <label htmlFor="promo" className="block mb-2 text-gray-700">
+          <div className="mt-4">
+            <label htmlFor="promo" className="block mb-2 text-gray-600">
               Have a promo code?
             </label>
             <div className="flex gap-2">
@@ -156,19 +168,19 @@ const Cart = () => {
                 id="promo"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                className="flex-1 border px-3 py-2 rounded"
+                className="flex-1 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-rose-400"
                 placeholder="Enter promo code"
               />
               <button
                 onClick={applyPromo}
-                className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded"
               >
                 Apply
               </button>
             </div>
           </div>
 
-          <button className="w-full mt-6 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded">
+          <button className="w-full mt-4 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow hover:shadow-lg transition-transform transform hover:scale-105">
             Proceed to Checkout
           </button>
         </div>

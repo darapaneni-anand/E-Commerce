@@ -6,19 +6,41 @@ import cart_icon from "../assets/cart_icon.png";
 import logo from "../assets/logo_big.png";
 
 function Navbar() {
-  const { cartCount } = useContext(ProductContext);
+  const { cartCount, setCartItems } = useContext(ProductContext);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    // Check initially
+    checkLoginStatus();
+
+    // Listen for storage changes (in case token changes in another tab)
+    window.addEventListener("storage", checkLoginStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+    };
   }, []);
 
   const handleLogout = () => {
+    // Clear all user-related data
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("cart");
+
+    // Clear cart in UI immediately
+    setCartItems([]);
+
+    // Update login state instantly
     setIsLoggedIn(false);
+
+    // Navigate to login/auth page
     navigate("/auth");
   };
 
@@ -35,10 +57,7 @@ function Navbar() {
 
         {/* Hamburger icon */}
         <div className="md:hidden">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="focus:outline-none"
-          >
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="focus:outline-none">
             <svg
               className="h-7 w-7 text-blue-700"
               fill="none"
@@ -47,19 +66,9 @@ function Navbar() {
               xmlns="http://www.w3.org/2000/svg"
             >
               {mobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </button>
@@ -67,13 +76,13 @@ function Navbar() {
 
         {/* Desktop links */}
         <ul className="hidden md:flex gap-6 text-[17px] font-medium text-gray-700">
-          {['/', '/mens', '/womens', '/kids'].map((path, i) => (
+          {["/", "/mens", "/womens", "/kids"].map((path, i) => (
             <li key={path}>
               <Link
                 to={path}
                 className="px-4 py-2 rounded-xl transition-all duration-200 hover:bg-blue-600 hover:text-white"
               >
-                {['Home', 'Men', 'Women', 'Kids'][i]}
+                {["Home", "Men", "Women", "Kids"][i]}
               </Link>
             </li>
           ))}
@@ -84,7 +93,7 @@ function Navbar() {
           {isLoggedIn ? (
             <button
               onClick={handleLogout}
-              className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:shadow-lg transition duration-300"
+              className="cursor-pointer bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-2 rounded-full font-semibold shadow-md hover:shadow-lg transition duration-300"
             >
               Logout
             </button>
@@ -109,62 +118,6 @@ function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white px-4 pb-4 rounded-b-2xl shadow-md animate-fadeIn">
-          <ul className="flex flex-col gap-3 text-lg font-medium text-gray-700">
-            {['/', '/mens', '/womens', '/kids'].map((path, i) => (
-              <li key={path}>
-                <Link
-                  to={path}
-                  className="block px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {['Home', 'Men', 'Women', 'Kids'][i]}
-                </Link>
-              </li>
-            ))}
-
-            <li>
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-2 rounded-full font-semibold text-center shadow hover:shadow-md transition"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to="/auth"
-                  className="block bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-full font-semibold text-center shadow hover:shadow-md transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Login
-                </Link>
-              )}
-            </li>
-
-            <li>
-              <Link
-                to="/cart"
-                className="flex items-center gap-2 px-4 py-2 hover:text-blue-700"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <img src={cart_icon} alt="Cart" className="h-6" />
-                {cartCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
     </nav>
   );
 }

@@ -1,24 +1,20 @@
-import React, { useContext, useState } from 'react';
-import ProductContext from '../components/Context/ProductContext';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from "react";
+import ProductContext from "../components/Context/ProductContext";
+import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const {
-    cartItems,
-    removeFromCart,
-    updateCartQuantity,
-  } = useContext(ProductContext);
+  const { cartItems, removeFromCart, updateCartQuantity } =
+    useContext(ProductContext);
 
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
 
-  // Example promo logic
   const applyPromo = () => {
-    if (promoCode.trim().toUpperCase() === 'SAVE10') {
+    if (promoCode.trim().toUpperCase() === "SAVE10") {
       setPromoDiscount(0.1);
     } else {
       setPromoDiscount(0);
-      alert('Invalid promo code');
+      alert("Invalid promo code");
     }
   };
 
@@ -47,10 +43,11 @@ const Cart = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-4xl font-bold text-rose-700 mb-12">Your Shopping Cart</h1>
+      <h1 className="text-4xl font-bold text-rose-700 mb-12">
+        Your Shopping Cart
+      </h1>
 
       <div className="grid md:grid-cols-3 gap-10">
-        {/* LEFT SIDE: CART ITEMS */}
         <div className="md:col-span-2 space-y-6">
           {cartItems.map((item) => (
             <div
@@ -120,7 +117,6 @@ const Cart = () => {
           ))}
         </div>
 
-        {/* RIGHT SIDE: SUMMARY */}
         <div className="space-y-6 p-6 border rounded shadow bg-white">
           <h2 className="text-2xl font-bold text-rose-700 mb-4">Order Summary</h2>
 
@@ -138,7 +134,9 @@ const Cart = () => {
 
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>{shippingFee === 0 ? 'Free' : `₹${shippingFee.toFixed(2)}`}</span>
+            <span>
+              {shippingFee === 0 ? "Free" : `₹${shippingFee.toFixed(2)}`}
+            </span>
           </div>
 
           <hr />
@@ -148,7 +146,6 @@ const Cart = () => {
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
 
-          {/* PROMO CODE */}
           <div className="mt-6">
             <label htmlFor="promo" className="block mb-2 text-gray-700">
               Have a promo code?

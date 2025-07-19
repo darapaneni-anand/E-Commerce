@@ -1,22 +1,27 @@
-import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductContext from "../components/Context/ProductContext";
 
 const Item = ({ id, name, image, old_price, new_price }) => {
-  const { addToCart } = useContext(ProductContext);
+  const { addToCart, cartItems } = useContext(ProductContext);
+  const [added, setAdded] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if this product is already in the cart
+    const inCart = cartItems.some(item => item.id === id);
+    setAdded(inCart);
+  }, [cartItems, id]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-
-    const product = {
-      id,
-      name,
-      image,
-      old_price,
-      new_price,
-    };
-
-    addToCart(product, 1);
+    if (!added) {
+      const product = { id, name, image, old_price, new_price };
+      addToCart(product, 1);
+      setAdded(true);
+    } else {
+      navigate("/cart");
+    }
   };
 
   return (
@@ -36,19 +41,23 @@ const Item = ({ id, name, image, old_price, new_price }) => {
 
         <div>
           <div className="flex items-center gap-2 mb-4">
-          <span className="text-gray-500 line-through text-sm">
-            ₹{old_price}
-          </span>
-          <span className="text-rose-600 font-bold text-lg">
-            ₹{new_price}
-          </span>
-        </div>
+            <span className="text-gray-500 line-through text-sm">
+              ₹{old_price}
+            </span>
+            <span className="text-rose-600 font-bold text-lg">
+              ₹{new_price}
+            </span>
+          </div>
 
           <button
             onClick={handleAddToCart}
-            className="w-full px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded font-semibold transition"
+            className={`w-full px-4 py-2 rounded font-semibold transition ${
+              added
+                ? "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-rose-600 hover:bg-rose-700 text-white"
+            }`}
           >
-            Add to Cart
+            {added ? "Go to Cart" : "Add to Cart"}
           </button>
         </div>
       </div>

@@ -23,8 +23,9 @@ app.use("/images", express.static("upload/images"));
 app.use(require("./routes/authRoutes"));
 app.use(require("./routes/productRoutes"));
 app.use(require("./routes/uploadRoutes"));
+app.use(require("./routes/cartRoutes")); // <-- Added cart routes
 
-
+// Root endpoint
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
-import navProfile from "../assets/nav-profile.svg";
+import profilepic from "../assets/profilepic.png";
 
 function AdminNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,7 +51,7 @@ function AdminNavbar() {
         {/* Profile icon */}
         <div className="hidden md:block">
           <img
-            src={navProfile}
+            src={profilepic}
             alt="Profile"
             className="h-10 w-10 rounded-full object-cover border border-white cursor-pointer"
           />

@@ -14,7 +14,6 @@ export const ProductProvider = ({ children }) => {
         const res = await fetch('http://localhost:4000/allproducts');
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch products");
-        // Normalize ID
         const normalized = data.map(p => ({ ...p, id: p._id || p.id }));
         setProducts(normalized);
       } catch (err) {
@@ -99,19 +98,29 @@ export const ProductProvider = ({ children }) => {
   };
 
   const removeFromCart = (id, size) =>
-  setCartItems((prev) =>
-    prev.filter((item) => !(item.id === id && item.size === size))
-  );
+    setCartItems(prev =>
+      prev.filter(item => !(item.id === id && item.size === size))
+    );
 
-  const updateCartQuantity = (id, quantity, size) =>
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? { ...item, quantity, size: size || item.size }
-        : item
-    )
-  );
+  // Update quantity for the matching id & size
+  const updateCartQuantity = (id, size, quantity) =>
+    setCartItems(prev =>
+      prev.map(item =>
+        item.id === id && item.size === size
+          ? { ...item, quantity }
+          : item
+      )
+    );
 
+  // Update size of an existing cart item
+  const updateCartSize = (id, oldSize, newSize) =>
+    setCartItems(prev =>
+      prev.map(item =>
+        item.id === id && item.size === oldSize
+          ? { ...item, size: newSize }
+          : item
+      )
+    );
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -125,6 +134,7 @@ export const ProductProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateCartQuantity,
+        updateCartSize,
         cartCount,
       }}
     >

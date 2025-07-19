@@ -3,7 +3,7 @@ import ProductContext from "../components/Context/ProductContext";
 import { Link } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateCartQuantity } = useContext(ProductContext);
+  const { cartItems, removeFromCart, updateCartQuantity, updateCartSize } = useContext(ProductContext);
 
   const [promoCode, setPromoCode] = useState("");
   const [promoDiscount, setPromoDiscount] = useState(0);
@@ -60,39 +60,38 @@ const Cart = () => {
           {cartItems.map((item) => (
             <div
               key={`${item.id}-${item.size}`}
-              className="flex flex-col md:flex-row gap-6 items-center p-5 rounded-xl shadow-md bg-white hover:shadow-lg transition"
+              className="flex flex-col md:flex-row gap-6 items-center p-5 rounded-xl shadow-md bg-white hover:shadow-lg transition border border-gray-200"
             >
               <img
                 src={item.image}
                 alt={item.name}
-              className="w-36 h-36 object-contain rounded-xl bg-white border border-gray-200 shadow-sm"
+                className="w-36 h-36 object-contain rounded-xl bg-white border border-gray-200 shadow-sm"
               />
 
-             <div className="flex-1 space-y-2">
-  <Link
-    to={`/product/${item.id}`}
-    className="text-lg font-bold text-rose-700 hover:underline"
-  >
-    {item.name}
-  </Link>
+              <div className="flex-1 space-y-4">
+                <Link
+                  to={`/product/${item.id}`}
+                  className="text-xl font-bold text-gray-800 hover:text-rose-600 transition-colors"
+                >
+                  {item.name}
+                </Link>
 
-  {/* Size Selector */}
-  <div className="flex items-center gap-3">
-    <label className="text-gray-700">Size:</label>
-    <select
-      value={item.size}
-      onChange={(e) =>
-        updateCartQuantity(item.id, item.quantity, e.target.value)
-      }
-      className="border rounded px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-400"
-    >
-      <option value="S">S</option>
-      <option value="M">M</option>
-      <option value="L">L</option>
-      <option value="XL">XL</option>
-    </select>
-  </div>
-
+                {/* Size Selector */}
+                <div className="flex items-center gap-3">
+                  <label className="text-gray-600 font-medium">Size:</label>
+                  <select
+                    value={item.size}
+                    onChange={(e) =>
+                      updateCartSize(item.id, item.size, e.target.value)
+                    }
+                    className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-400 transition-all duration-200 hover:bg-gray-100"
+                  >
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                  </select>
+                </div>
 
                 {/* Quantity controls */}
                 <div className="flex items-center gap-2 mt-2">
@@ -100,16 +99,18 @@ const Cart = () => {
                     onClick={() =>
                       updateCartQuantity(item.id, item.size, Math.max(1, item.quantity - 1))
                     }
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full"
+                    className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-lg font-bold transition"
                   >
                     −
                   </button>
-                  <span className="w-10 text-center font-medium">{item.quantity}</span>
+                  <span className="w-12 h-10 flex items-center justify-center font-semibold text-gray-800 bg-white border border-gray-300 rounded">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() =>
                       updateCartQuantity(item.id, item.size, item.quantity + 1)
                     }
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full"
+                    className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg text-lg font-bold transition"
                   >
                     +
                   </button>

@@ -21,9 +21,8 @@ const Cart = () => {
     (total, item) => total + item.new_price * item.quantity,
     0
   );
-
   const discountAmount = subtotal * promoDiscount;
-  const shippingFee = subtotal > 500 ? 0 : 50;
+  const shippingFee = subtotal > 500 ? 0 : 40;
   const grandTotal = subtotal - discountAmount + shippingFee;
 
   if (cartItems.length === 0) {

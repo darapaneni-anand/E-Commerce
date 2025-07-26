@@ -25,10 +25,9 @@ const AuthPage = () => {
     setError('');
 
     const { name, email, password } = formData;
-
     const endpoint = isLogin
-      ? 'http://localhost:4000/login'
-      : 'http://localhost:4000/signup';
+      ? 'http://localhost:4000/auth/login'
+      : 'http://localhost:4000/auth/signup';
 
     const payload = isLogin
       ? { email, password }
@@ -42,10 +41,7 @@ const AuthPage = () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Something went wrong');
-      }
+      if (!res.ok) throw new Error(data.message || 'Something went wrong');
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -57,7 +53,6 @@ const AuthPage = () => {
     }
   };
 
-  // Handle Google Login
   const handleGoogleLogin = async (credentialResponse) => {
     try {
       const res = await fetch('http://localhost:4000/auth/google', {
@@ -67,10 +62,7 @@ const AuthPage = () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Google login failed');
-      }
+      if (!res.ok) throw new Error(data.message || 'Google login failed');
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -90,9 +82,7 @@ const AuthPage = () => {
             {isLogin ? 'Welcome Back!' : 'Join Us Today'}
           </h1>
 
-          {error && (
-            <p className="text-center text-red-600 font-medium mb-4">{error}</p>
-          )}
+          {error && <p className="text-center text-red-600 font-medium mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
@@ -159,10 +149,7 @@ const AuthPage = () => {
           </form>
 
           <div className="mt-5 flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleLogin}
-              onError={() => setError('Google login failed')}
-            />
+            <GoogleLogin onSuccess={handleGoogleLogin} onError={() => setError('Google login failed')} />
           </div>
 
           <p className="text-center text-sm text-gray-600 mt-5">

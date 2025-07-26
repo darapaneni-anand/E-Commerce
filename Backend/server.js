@@ -1,4 +1,3 @@
-// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -9,21 +8,27 @@ const port = 4000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your frontend URL
+    credentials: true,
+  })
+);
 
 // DB Connection
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("DB connected"))
-  .catch(err => console.error("MongoDB connection error:", err));
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Static file serving
+// Static files (if you have image uploads)
 app.use("/images", express.static("upload/images"));
 
 // Routes
-app.use(require("./routes/authRoutes"));
+app.use("/auth", require("./routes/authRoutes"));
 app.use(require("./routes/productRoutes"));
 app.use(require("./routes/uploadRoutes"));
-app.use(require("./routes/cartRoutes")); // <-- Added cart routes
+app.use(require("./routes/cartRoutes"));
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -32,5 +37,5 @@ app.get("/", (req, res) => {
 
 // Server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });

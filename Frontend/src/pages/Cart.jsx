@@ -25,6 +25,59 @@ const Cart = () => {
   const shippingFee = subtotal > 500 ? 0 : 40;
   const grandTotal = subtotal - discountAmount + shippingFee;
 
+  // Razorpay Checkout Handler
+  const handleCheckout = async () => {
+    if (grandTotal <= 0) {
+      alert("Cart total must be greater than 0");
+      return;
+    }
+
+    try {
+      // 1. Create an order on your backend
+      const orderResponse = await fetch("http://localhost:4000/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: grandTotal }), // amount in INR
+      });
+
+      const order = await orderResponse.json();
+
+      // 2. Load Razorpay script
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      document.body.appendChild(script);
+
+      script.onload = () => {
+        const options = {
+          key: "rzp_test_fpDLxDru16cxdu", // Replace with your Razorpay Test Key ID
+          amount: order.amount,
+          currency: order.currency,
+          name: "My E-Commerce Store",
+          description: "Order Payment",
+          order_id: order.id,
+          handler: function (response) {
+            alert("Payment Successful!\nPayment ID: " + response.razorpay_payment_id);
+          },
+          prefill: {
+            name: "Test User",
+            email: "test@example.com",
+            contact: "9999999999",
+          },
+          theme: {
+            color: "#EF4444",
+          },
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while processing the payment.");
+    }
+  };
+
   if (cartItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-center px-6 bg-gradient-to-b from-rose-50 to-pink-50">
@@ -180,7 +233,10 @@ const Cart = () => {
             </div>
           </div>
 
-          <button className="w-full mt-4 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow hover:shadow-lg transition-transform transform hover:scale-105">
+          <button
+            onClick={handleCheckout}
+            className="w-full mt-4 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow hover:shadow-lg transition-transform transform hover:scale-105"
+          >
             Proceed to Checkout
           </button>
         </div>

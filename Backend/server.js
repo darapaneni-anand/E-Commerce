@@ -29,6 +29,7 @@ app.use("/auth", require("./routes/authRoutes"));
 app.use(require("./routes/productRoutes"));
 app.use(require("./routes/uploadRoutes"));
 app.use(require("./routes/cartRoutes"));
+app.use(require("./routes/paymentRoutes"));
 
 // Root endpoint
 app.get("/", (req, res) => {

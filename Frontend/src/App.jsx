@@ -10,10 +10,13 @@ import Cart from "./pages/Cart";
 import Footer from "./components/Footer.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import AboutMe from "./pages/Aboutme.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 function App() {
   return (
     <Router>
+
+      < ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow">

@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-const API_URL = "https://e-commerce-bsss.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ListAllProducts() {
   const [products, setProducts] = useState([]);
+
+  // Normalize image URL: if DB stores full URL, use as is; otherwise prepend API_URL
+  const getImageURL = (image) => {
+    if (!image) return "";
+    if (image.startsWith("http://") || image.startsWith("https://")) return image;
+    return `${API_URL}/${image}`;
+  };
 
   // Fetch all products
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API_URL}/allproducts`);
       const data = await res.json();
-
-      // Normalize image URLs
-      const normalized = data.map(p => ({
-        ...p,
-        id: p._id || p.id,
-        image: `${API_URL}/${p.image}` // prepend API_URL
-      }));
-
-      setProducts(normalized);
+      setProducts(data);
     } catch (err) {
       console.error("Failed to fetch products:", err);
     }
@@ -31,9 +30,7 @@ function ListAllProducts() {
     try {
       const res = await fetch(`${API_URL}/removeproduct`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, name }),
       });
 
@@ -54,7 +51,7 @@ function ListAllProducts() {
   }, []);
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen ml-64">
+    <div className="p-8 bg-gray-50 min-h-screen">
       <h2 className="text-3xl font-bold mb-8 text-center text-rose-700">All Products</h2>
 
       {products.length === 0 ? (
@@ -67,9 +64,10 @@ function ListAllProducts() {
               className="bg-white p-4 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300"
             >
               <img
-                src={product.image}
+                src={getImageURL(product.image)}
                 alt={product.name}
                 className="w-full h-48 object-contain rounded-md mb-4 border"
+                onError={(e) => (e.target.src = "/placeholder.png")}
               />
               <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.name}</h3>
               <p className="text-sm text-gray-500 capitalize mb-2">{product.category}</p>

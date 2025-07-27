@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-
+const API_URL = "https://e-commerce-bsss.onrender.com";
 function AddProduct() {
+  
+
   const [productData, setProductData] = useState({
     name: "",
     category: "",
@@ -33,6 +33,7 @@ function AddProduct() {
     formData.append("image", productData.image);
 
     try {
+      // 1. Upload image first
       const uploadRes = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: formData,
@@ -43,20 +44,31 @@ function AddProduct() {
 
       const imageUrl = uploadData.image_url;
 
+      // 2. Then send product data
       const productRes = await fetch(`${API_URL}/addproduct`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: productData.name,
           category: productData.category,
           new_price: productData.new_price,
           old_price: productData.old_price,
-          image: imageUrl.split("/").pop(),
+          image: imageUrl, // pass the uploaded image URL
         }),
       });
 
       if (productRes.ok) {
         alert("Product uploaded successfully!");
+        setProductData({
+          name: "",
+          category: "",
+          new_price: "",
+          old_price: "",
+          image: null,
+        });
+        setPreviewURL(null);
       } else {
         alert("Product upload failed.");
       }
@@ -71,6 +83,7 @@ function AddProduct() {
       <h2 className="text-2xl font-bold mb-6 text-gray-700">Add Product</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Product Name */}
         <input
           type="text"
           name="name"
@@ -81,6 +94,7 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
+        {/* Category Dropdown */}
         <select
           name="category"
           value={productData.category}
@@ -94,6 +108,7 @@ function AddProduct() {
           <option value="kid">Kid</option>
         </select>
 
+        {/* Old Price */}
         <input
           type="number"
           name="old_price"
@@ -104,6 +119,7 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
+        {/* New Price */}
         <input
           type="number"
           name="new_price"
@@ -114,8 +130,11 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
+        {/* Image Upload */}
         <div>
-          <label className="block mb-2 text-gray-600 font-medium">Upload Image</label>
+          <label className="block mb-2 text-gray-600 font-medium">
+            Upload Image
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -125,13 +144,19 @@ function AddProduct() {
           />
         </div>
 
+        {/* Image Preview */}
         {previewURL && (
           <div className="mt-4">
             <p className="text-gray-600 mb-2">Image Preview:</p>
-            <img src={previewURL} alt="Preview" className="w-48 h-48 object-contain border rounded shadow" />
+            <img
+              src={previewURL}
+              alt="Preview"
+              className="w-48 h-48 object-contain border rounded shadow"
+            />
           </div>
         )}
 
+        {/* Submit Button */}
         <button
           type="submit"
           className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-6 py-2 rounded"

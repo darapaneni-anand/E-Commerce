@@ -2,6 +2,10 @@ import React, { createContext, useState, useEffect } from 'react';
 
 const ProductContext = createContext();
 
+// Use environment variable for backend URL
+const API_URL = import.meta.env.VITE_API_URL || "https://e-commerce-bsss.onrender.com";
+
+
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
@@ -11,7 +15,7 @@ export const ProductProvider = ({ children }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:4000/allproducts');
+        const res = await fetch(`${API_URL}/allproducts`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch products");
         const normalized = data.map(p => ({ ...p, id: p._id || p.id }));
@@ -29,7 +33,7 @@ export const ProductProvider = ({ children }) => {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user?.id) {
         try {
-          const res = await fetch(`http://localhost:4000/getcart/${user.id}`);
+          const res = await fetch(`${API_URL}/getcart/${user.id}`);
           const data = await res.json();
           if (res.ok && data?.cart) {
             setCartItems(data.cart);
@@ -51,7 +55,7 @@ export const ProductProvider = ({ children }) => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (isCartLoaded && user?.id) {
-      fetch("http://localhost:4000/savecart", {
+      fetch(`${API_URL}/savecart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, cart: cartItems }),
@@ -102,7 +106,6 @@ export const ProductProvider = ({ children }) => {
       prev.filter(item => !(item.id === id && item.size === size))
     );
 
-  // Update quantity for the matching id & size
   const updateCartQuantity = (id, size, quantity) =>
     setCartItems(prev =>
       prev.map(item =>
@@ -112,7 +115,6 @@ export const ProductProvider = ({ children }) => {
       )
     );
 
-  // Update size of an existing cart item
   const updateCartSize = (id, oldSize, newSize) =>
     setCartItems(prev =>
       prev.map(item =>

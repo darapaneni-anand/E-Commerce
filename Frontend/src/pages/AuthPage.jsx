@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
+const API_URL = import.meta.env.VITE_API_URL || "https://e-commerce-bsss.onrender.com";
+
+
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -26,8 +29,8 @@ const AuthPage = () => {
 
     const { name, email, password } = formData;
     const endpoint = isLogin
-      ? 'http://localhost:4000/auth/login'
-      : 'http://localhost:4000/auth/signup';
+  ? `${API_URL}/auth/login`
+  : `${API_URL}/auth/signup`;
 
     const payload = isLogin
       ? { email, password }
@@ -55,7 +58,7 @@ const AuthPage = () => {
 
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-      const res = await fetch('http://localhost:4000/auth/google', {
+      const res = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credentialResponse.credential }),

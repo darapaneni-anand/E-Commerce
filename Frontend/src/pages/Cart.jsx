@@ -34,13 +34,17 @@ const Cart = () => {
 
     try {
       // 1. Create an order on your backend
-      const orderResponse = await fetch("http://localhost:4000/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amount: grandTotal }), // amount in INR
-      });
+     const API_URL = import.meta.env.VITE_API_URL || "https://e-commerce-bsss.onrender.com";
+
+
+const orderResponse = await fetch(`${API_URL}/create-order`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ amount: grandTotal }), // amount in INR
+});
+
 
       const order = await orderResponse.json();
 

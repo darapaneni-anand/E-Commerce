@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from "react";
 
+const API_URL = "https://e-commerce-bsss.onrender.com";
+
 function ListAllProducts() {
   const [products, setProducts] = useState([]);
 
   // Fetch all products
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:4000/allproducts");
+      const res = await fetch(`${API_URL}/allproducts`);
       const data = await res.json();
-      setProducts(data);
+
+      // Normalize image URLs
+      const normalized = data.map(p => ({
+        ...p,
+        id: p._id || p.id,
+        image: `${API_URL}/${p.image}` // prepend API_URL
+      }));
+
+      setProducts(normalized);
     } catch (err) {
       console.error("Failed to fetch products:", err);
     }
@@ -19,7 +29,7 @@ function ListAllProducts() {
     if (!window.confirm(`Are you sure you want to remove "${name}"?`)) return;
 
     try {
-      const res = await fetch("http://localhost:4000/removeproduct", {
+      const res = await fetch(`${API_URL}/removeproduct`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

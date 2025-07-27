@@ -11,11 +11,11 @@ const ProductSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    type: String, // Main image
+    type: String, // Main image URL
     required: true,
   },
   images: {
-    type: [String], // Additional thumbnail images
+    type: [String], // Array of thumbnail URLs
     default: [],
   },
   category: {

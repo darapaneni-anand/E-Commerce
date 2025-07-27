@@ -7,10 +7,10 @@ function AddProduct() {
     category: "",
     new_price: "",
     old_price: "",
+    mainImage: null,
+    thumbnails: [],
   });
 
-  const [mainImage, setMainImage] = useState(null);
-  const [thumbnailImages, setThumbnailImages] = useState([]);
   const [previewMain, setPreviewMain] = useState(null);
   const [previewThumbs, setPreviewThumbs] = useState([]);
 
@@ -22,30 +22,25 @@ function AddProduct() {
   const handleMainImage = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setMainImage(file);
+      setProductData((prev) => ({ ...prev, mainImage: file }));
       setPreviewMain(URL.createObjectURL(file));
     }
   };
 
   const handleThumbnails = (e) => {
-    const files = Array.from(e.target.files).slice(0, 4); // max 4
-    setThumbnailImages(files);
+    const files = Array.from(e.target.files).slice(0, 4); // Max 4 thumbnails
+    setProductData((prev) => ({ ...prev, thumbnails: files }));
     setPreviewThumbs(files.map((file) => URL.createObjectURL(file)));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!mainImage) {
-      alert("Please select a main image.");
-      return;
-    }
-
     try {
-      // 1. Upload images
+      // 1. Upload all images: main + thumbnails
       const formData = new FormData();
-      formData.append("images", mainImage); // main image first
-      thumbnailImages.forEach((file) => formData.append("images", file));
+      formData.append("images", productData.mainImage);
+      productData.thumbnails.forEach((file) => formData.append("images", file));
 
       const uploadRes = await fetch(`${API_URL}/upload-multiple`, {
         method: "POST",
@@ -55,29 +50,40 @@ function AddProduct() {
       const uploadData = await uploadRes.json();
       if (!uploadData.success) throw new Error("Image upload failed");
 
-      const [uploadedMain, ...uploadedThumbs] = uploadData.images;
+      const allUrls = uploadData.images;
+      const mainImageUrl = allUrls[0];
+      const thumbnailUrls = allUrls.slice(1);
 
       // 2. Save product details
       const productRes = await fetch(`${API_URL}/addproduct`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          ...productData,
-          image: uploadedMain,
-          images: uploadedThumbs,
+          name: productData.name,
+          category: productData.category,
+          new_price: productData.new_price,
+          old_price: productData.old_price,
+          image: mainImageUrl,
+          images: thumbnailUrls,
         }),
       });
 
       if (productRes.ok) {
-        alert("Product added successfully!");
-        // Reset form
-        setProductData({ name: "", category: "", new_price: "", old_price: "" });
-        setMainImage(null);
-        setThumbnailImages([]);
+        alert("Product uploaded successfully!");
+        setProductData({
+          name: "",
+          category: "",
+          new_price: "",
+          old_price: "",
+          mainImage: null,
+          thumbnails: [],
+        });
         setPreviewMain(null);
         setPreviewThumbs([]);
       } else {
-        alert("Failed to save product.");
+        alert("Product upload failed.");
       }
     } catch (err) {
       console.error("Upload error:", err);
@@ -133,37 +139,45 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
-        {/* Main Image */}
+        {/* Main Image Upload */}
         <div>
-          <label className="block mb-2 text-gray-600 font-medium">
-            Main Image
-          </label>
-          <input type="file" accept="image/*" onChange={handleMainImage} required />
+          <label className="block mb-2 text-gray-600 font-medium">Main Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleMainImage}
+            required
+            className="w-full border p-2 rounded bg-white"
+          />
           {previewMain && (
-            <img
-              src={previewMain}
-              alt="Main Preview"
-              className="mt-3 w-32 h-32 object-cover rounded-lg border"
-            />
+            <img src={previewMain} alt="Main Preview" className="w-48 h-48 object-contain mt-2" />
           )}
         </div>
 
-        {/* Thumbnails */}
+        {/* Thumbnails Upload */}
         <div>
           <label className="block mb-2 text-gray-600 font-medium">
-            Thumbnail Images (up to 4)
+            Thumbnails (up to 4)
           </label>
-          <input type="file" accept="image/*" multiple onChange={handleThumbnails} />
-          <div className="flex gap-3 mt-3 flex-wrap">
-            {previewThumbs.map((src, idx) => (
-              <img
-                key={idx}
-                src={src}
-                alt={`Thumbnail ${idx + 1}`}
-                className="w-24 h-24 object-cover rounded-lg border"
-              />
-            ))}
-          </div>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleThumbnails}
+            className="w-full border p-2 rounded bg-white"
+          />
+          {previewThumbs.length > 0 && (
+            <div className="flex gap-2 mt-2">
+              {previewThumbs.map((url, idx) => (
+                <img
+                  key={idx}
+                  src={url}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className="w-20 h-20 object-cover rounded"
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <button

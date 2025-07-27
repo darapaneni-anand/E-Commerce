@@ -1,40 +1,53 @@
 import React, { useState } from "react";
 const API_URL = "https://e-commerce-bsss.onrender.com";
-function AddProduct() {
-  
 
+function AddProduct() {
   const [productData, setProductData] = useState({
     name: "",
     category: "",
     new_price: "",
     old_price: "",
-    image: null,
   });
 
-  const [previewURL, setPreviewURL] = useState(null);
+  const [mainImage, setMainImage] = useState(null);
+  const [thumbnailImages, setThumbnailImages] = useState([]);
+  const [previewMain, setPreviewMain] = useState(null);
+  const [previewThumbs, setPreviewThumbs] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleMainImage = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProductData((prev) => ({ ...prev, image: file }));
-      setPreviewURL(URL.createObjectURL(file));
+      setMainImage(file);
+      setPreviewMain(URL.createObjectURL(file));
     }
+  };
+
+  const handleThumbnails = (e) => {
+    const files = Array.from(e.target.files).slice(0, 4); // max 4
+    setThumbnailImages(files);
+    setPreviewThumbs(files.map((file) => URL.createObjectURL(file)));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("image", productData.image);
+    if (!mainImage) {
+      alert("Please select a main image.");
+      return;
+    }
 
     try {
-      // 1. Upload image first
-      const uploadRes = await fetch(`${API_URL}/upload`, {
+      // 1. Upload images
+      const formData = new FormData();
+      formData.append("images", mainImage); // main image first
+      thumbnailImages.forEach((file) => formData.append("images", file));
+
+      const uploadRes = await fetch(`${API_URL}/upload-multiple`, {
         method: "POST",
         body: formData,
       });
@@ -42,35 +55,29 @@ function AddProduct() {
       const uploadData = await uploadRes.json();
       if (!uploadData.success) throw new Error("Image upload failed");
 
-      const imageUrl = uploadData.image_url;
+      const [uploadedMain, ...uploadedThumbs] = uploadData.images;
 
-      // 2. Then send product data
+      // 2. Save product details
       const productRes = await fetch(`${API_URL}/addproduct`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: productData.name,
-          category: productData.category,
-          new_price: productData.new_price,
-          old_price: productData.old_price,
-          image: imageUrl, // pass the uploaded image URL
+          ...productData,
+          image: uploadedMain,
+          images: uploadedThumbs,
         }),
       });
 
       if (productRes.ok) {
-        alert("Product uploaded successfully!");
-        setProductData({
-          name: "",
-          category: "",
-          new_price: "",
-          old_price: "",
-          image: null,
-        });
-        setPreviewURL(null);
+        alert("Product added successfully!");
+        // Reset form
+        setProductData({ name: "", category: "", new_price: "", old_price: "" });
+        setMainImage(null);
+        setThumbnailImages([]);
+        setPreviewMain(null);
+        setPreviewThumbs([]);
       } else {
-        alert("Product upload failed.");
+        alert("Failed to save product.");
       }
     } catch (err) {
       console.error("Upload error:", err);
@@ -83,7 +90,6 @@ function AddProduct() {
       <h2 className="text-2xl font-bold mb-6 text-gray-700">Add Product</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Product Name */}
         <input
           type="text"
           name="name"
@@ -94,7 +100,6 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
-        {/* Category Dropdown */}
         <select
           name="category"
           value={productData.category}
@@ -108,7 +113,6 @@ function AddProduct() {
           <option value="kid">Kid</option>
         </select>
 
-        {/* Old Price */}
         <input
           type="number"
           name="old_price"
@@ -119,7 +123,6 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
-        {/* New Price */}
         <input
           type="number"
           name="new_price"
@@ -130,33 +133,39 @@ function AddProduct() {
           className="w-full border p-2 rounded"
         />
 
-        {/* Image Upload */}
+        {/* Main Image */}
         <div>
           <label className="block mb-2 text-gray-600 font-medium">
-            Upload Image
+            Main Image
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            required
-            className="w-full border p-2 rounded bg-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-rose-100 file:text-rose-700 hover:file:bg-rose-200"
-          />
+          <input type="file" accept="image/*" onChange={handleMainImage} required />
+          {previewMain && (
+            <img
+              src={previewMain}
+              alt="Main Preview"
+              className="mt-3 w-32 h-32 object-cover rounded-lg border"
+            />
+          )}
         </div>
 
-        {/* Image Preview */}
-        {previewURL && (
-          <div className="mt-4">
-            <p className="text-gray-600 mb-2">Image Preview:</p>
-            <img
-              src={previewURL}
-              alt="Preview"
-              className="w-48 h-48 object-contain border rounded shadow"
-            />
+        {/* Thumbnails */}
+        <div>
+          <label className="block mb-2 text-gray-600 font-medium">
+            Thumbnail Images (up to 4)
+          </label>
+          <input type="file" accept="image/*" multiple onChange={handleThumbnails} />
+          <div className="flex gap-3 mt-3 flex-wrap">
+            {previewThumbs.map((src, idx) => (
+              <img
+                key={idx}
+                src={src}
+                alt={`Thumbnail ${idx + 1}`}
+                className="w-24 h-24 object-cover rounded-lg border"
+              />
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-6 py-2 rounded"

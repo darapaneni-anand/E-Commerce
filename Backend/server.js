@@ -8,9 +8,13 @@ const port = 4000;
 
 // Middleware
 app.use(express.json());
+
+// Dynamic CORS: allows requests from any origin, including different localhost ports
 app.use(
   cors({
-    origin: "http://localhost:5173", // your frontend URL
+    origin: (origin, callback) => {
+      callback(null, true); // Always allow the requesting origin
+    },
     credentials: true,
   })
 );
@@ -21,7 +25,7 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Static files (if you have image uploads)
+// Serve static image files
 app.use("/images", express.static("upload/images"));
 
 // Routes

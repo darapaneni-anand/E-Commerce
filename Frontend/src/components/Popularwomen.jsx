@@ -11,7 +11,7 @@ function PopularWomen() {
     .slice(0, 4);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-white" id="popular">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <h2 className="text-center text-4xl md:text-5xl font-extrabold text-rose-700 mb-12">
           Popular for Women

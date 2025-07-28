@@ -35,9 +35,8 @@ function AddProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      // 1. Upload all images: main + thumbnails
+      // 1. Upload all images to Cloudinary
       const formData = new FormData();
       formData.append("images", productData.mainImage);
       productData.thumbnails.forEach((file) => formData.append("images", file));
@@ -54,12 +53,10 @@ function AddProduct() {
       const mainImageUrl = allUrls[0];
       const thumbnailUrls = allUrls.slice(1);
 
-      // 2. Save product details
+      // 2. Save product details to DB
       const productRes = await fetch(`${API_URL}/addproduct`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: productData.name,
           category: productData.category,
@@ -94,7 +91,6 @@ function AddProduct() {
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-bold mb-6 text-gray-700">Add Product</h2>
-
       <form onSubmit={handleSubmit} className="space-y-5">
         <input
           type="text"

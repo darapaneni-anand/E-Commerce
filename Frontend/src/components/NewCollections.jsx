@@ -11,7 +11,7 @@ function NewCollections() {
     .slice(0, 8);
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-16 px-4 bg-white" id="new-collections">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-center text-rose-700 mb-12">
           New Collections

@@ -5,12 +5,13 @@ import Item from '../components/Item';
 const ShopCategory = (props) => {
   const { products } = useContext(ProductContext);
 
-  // Filter by category
+  // Filter by category (case-insensitive)
   const filteredProducts = products.filter(
-    (product) => product.category === props.category
+    (product) => product.category.toLowerCase() === props.category.toLowerCase()
   );
 
   const [sortOption, setSortOption] = useState('');
+  const [showAll, setShowAll] = useState(false); // Track Explore More / Show Less
 
   // Sort logic
   let sortedProducts = [...filteredProducts];
@@ -28,6 +29,9 @@ const ShopCategory = (props) => {
     setSortOption(e.target.value);
   };
 
+  // Determine how many products to display
+  const visibleProducts = showAll ? sortedProducts : sortedProducts.slice(0, 12);
+
   return (
     <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-6">
       {/* Banner */}
@@ -44,7 +48,7 @@ const ShopCategory = (props) => {
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
         <span className="text-gray-600 text-sm md:text-base">
-          <b></b> Showing {sortedProducts.length} products
+          Showing {visibleProducts.length} of {sortedProducts.length} products
         </span>
 
         <div className="flex items-center gap-2">
@@ -68,7 +72,7 @@ const ShopCategory = (props) => {
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sortedProducts.map((item) => (
+        {visibleProducts.map((item) => (
           <Item
             key={item.id}
             id={item.id}
@@ -80,12 +84,26 @@ const ShopCategory = (props) => {
         ))}
       </div>
 
-      {/* Explore More Button */}
-      <div className="mt-12 text-center">
-        <button className="px-8 py-3 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-lg font-semibold shadow transition">
-          Explore More
-        </button>
-      </div>
+      {/* Explore More / Show Less Button */}
+      {sortedProducts.length > 12 && (
+        <div className="mt-12 text-center">
+          {!showAll ? (
+            <button
+              onClick={() => setShowAll(true)}
+              className="px-8 py-3 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-lg font-semibold shadow transition"
+            >
+              Explore More
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAll(false)}
+              className="px-8 py-3 rounded-full bg-gray-600 hover:bg-gray-700 text-white text-lg font-semibold shadow transition"
+            >
+              Show Less
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

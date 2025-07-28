@@ -31,6 +31,9 @@ app.use(require("./routes/productRoutes"));
 app.use(require("./routes/uploadRoutes"));  // Upload route sends Cloudinary URLs
 app.use(require("./routes/cartRoutes"));
 app.use(require("./routes/paymentRoutes"));
+app.use(require("./routes/newsletterRoutes"));
+
+
 
 // Root endpoint
 app.get("/", (req, res) => {

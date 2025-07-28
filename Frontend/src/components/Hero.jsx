@@ -18,7 +18,8 @@ function Hero() {
       <div className="relative container mx-auto px-6 flex flex-col-reverse md:flex-row items-center gap-10 md:gap-14 -mt-8">
         
         {/* Left Text Section */}
-        <div className="flex-1 text-center md:text-left space-y-8">
+        <div className="flex-1 text-center md:text-left space-y-8 md:pl-10">
+
           
           {/* Main Heading with Gradient Text */}
           <div className="space-y-4">

@@ -1,7 +1,10 @@
-import express from "express";
-import multer from "multer";
-import cloudinary from "../cloudinary.js";
-import streamifier from "streamifier";
+const express = require("express");
+const multer = require("multer");
+const cloudinary = require("../cloudinary");
+const streamifier = require("streamifier");
+
+
+
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -38,4 +41,4 @@ router.post("/upload-multiple", upload.array("images", 5), async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

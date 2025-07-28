@@ -4,12 +4,12 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 // Middleware
 app.use(express.json());
 
-// Dynamic CORS: allows requests from any origin, including different localhost ports
+// Dynamic CORS
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -25,13 +25,10 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Serve static image files
-app.use("/images", express.static("upload/images"));
-
 // Routes
 app.use("/auth", require("./routes/authRoutes"));
 app.use(require("./routes/productRoutes"));
-app.use(require("./routes/uploadRoutes"));
+app.use(require("./routes/uploadRoutes"));  // Upload route sends Cloudinary URLs
 app.use(require("./routes/cartRoutes"));
 app.use(require("./routes/paymentRoutes"));
 

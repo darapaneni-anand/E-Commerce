@@ -1,42 +1,41 @@
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+import express from "express";
+import multer from "multer";
+import cloudinary from "../cloudinary.js";
+import streamifier from "streamifier";
 
 const router = express.Router();
-
-// Ensure upload folder exists
-const uploadDir = path.join(__dirname, "../upload/images");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer storage configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Route to handle multiple image uploads (1 main + up to 4 thumbnails)
-router.post("/upload-multiple", upload.array("images", 5), (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ success: 0, message: "No files uploaded" });
-  }
-
-  const urls = req.files.map(
-    (file) => `${req.protocol}://${req.get("host")}/images/${file.filename}`
-  );
-
-  res.json({
-    success: 1,
-    images: urls,
+// Helper: upload a single file buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "ecommerce_products" },
+      (error, result) => {
+        if (result) resolve(result.secure_url);
+        else reject(error);
+      }
+    );
+    streamifier.createReadStream(fileBuffer).pipe(stream);
   });
+};
+
+// Upload multiple images
+router.post("/upload-multiple", upload.array("images", 5), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: "No images uploaded" });
+    }
+
+    // Upload all files to Cloudinary
+    const urls = await Promise.all(req.files.map(file => uploadToCloudinary(file.buffer)));
+
+    res.json({ success: true, images: urls });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
-module.exports = router;
+export default router;
